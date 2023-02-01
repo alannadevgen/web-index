@@ -1,12 +1,15 @@
+from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
 import re
 import requests
-from abc import ABC, abstractmethod
+import string
+
 
 class AbstractIndex(ABC):
-    def __init__(self, documents=None) -> None:
+    def __init__(self, urls=None) -> None:
         self.index = dict()
-        self.documents = documents
+        self.urls = urls
+        self.visited_urls = {}
 
     def download_url(self, url):
         return requests.get(url).text
@@ -20,16 +23,17 @@ class AbstractIndex(ABC):
         return raw_text
 
     def tokenize(self, text):
-        # delete all strings that are not letters or numbers
+        """
+        In order to tokenize the text we need to:
+            - Delete all strings that are not letters or numbers and punctuation in the string
+            - Lowercase, remove leading and trailing whitespace and split the string
+
+        Returns
+        -------
+            list: list of tokens
+        """
         text = re.sub(r"(?i)^(?:(?![×Þß÷þø])[-'0-9a-zÀ-ÿ])+$", "", text)
-        # remove numbers in between brackets and punctuation in the string
-        my_punct = ['!', '"', '#', '$', '%', '&', '(', ')', '*', '+', ',', '.',
-                    '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_',
-                    '`', '{', '|', '}', '~', '»', '«', '“', '”', '\t', '\n']
-        text = re.sub("\[.*?\]|[" + re.escape("".join(my_punct)) + "]", "", text)
-        text = re.sub(r"'| - ", " ", text)
-        # lowercase, remove leading and trailing whitespace and split the string
-        return text.lower().strip().split()
+        return ''.join(' ' if char in string.punctuation else char for char in text).lower().strip('').split(sep=" ")
 
     @abstractmethod
     def create_index(self, doc_id, tokens):
@@ -37,4 +41,3 @@ class AbstractIndex(ABC):
 
     def metadata(self):
         pass
-
