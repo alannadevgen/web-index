@@ -1,26 +1,54 @@
-from index.abstract_index import AbstractIndex
+from abstract_index import AbstractIndex
+from collections import Counter
+import logging
+
+logging.basicConfig(
+    format='%(asctime)s %(levelname)s:%(message)s',
+    level=logging.INFO)
+
 
 class NonPositionalIndex(AbstractIndex):
-    def __init__(self, documents=None) -> None:
-        super().__init__(documents)
+    def __init__(
+            self,
+            index={},
+            urls=None,
+            delete_stopwords=False
+    ) -> None:
+        super().__init__(
+            index=index,
+            urls=urls,
+            delete_stopwords=delete_stopwords
+        )
+        
 
-    
-    def create_index(self, doc_id, tokens):
-        appeared_words = dict()
-        # compute the frequency by token
-        for token in tokens:
-            token_frequency = appeared_words[token] if token in appeared_words else 0
-            appeared_words[token] = token_frequency + 1
-        # print(appeared_words, '\n\n\n')
+    def create_index(self):
+        for doc_id, url in enumerate(self.urls):
+            text = self.get_text_from_url(url=url)
+            if text:
+                self.visited_urls.append(url)
+                self.nb_visited_urls += 1
+                tokens = self.tokenize(text=text)
+                tokens_count = Counter(tokens)
+                for token in tokens_count:
+                    if token not in self.index.keys():
+                        self.index[token] = [
+                            {'doc_id': doc_id, 'count': tokens_count[token]}]
+                    else:
+                        self.index[token].append(
+                            {'doc_id': doc_id, 'count': tokens_count[token]})
+            else:
+                self.failed_urls.append(url)
+                self.nb_failed_urls += 1
+                logging.warning(f'Failed to reach {url}')
 
-        # update the inverted index for each token
-        update_dict = {
-            key: appearance
-            if key not in self.index
-            else self.index[key] + [appearance]
-            for (key, appearance) in appeared_words.items()
-        }
-        # sort the tokens by appearance
-        update_dict = sorted(update_dict.items(), key=lambda kv: kv[1], reverse=True)
-        # update the index
-        self.index.update(update_dict)
+    def get_metadata(self):
+        return super().get_metadata()
+
+    def run(self):
+        self.create_index()
+        print(self.index)
+        print()
+        print(self.get_metadata())
+        print()
+        print(self.get_status())
+
