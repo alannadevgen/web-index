@@ -44,11 +44,13 @@ class NonPositionalIndex(AbstractIndex):
     def get_metadata(self):
         return super().get_metadata()
 
+    def get_index(self):
+        return self.index
+
     def run(self):
         self.create_index()
         print(self.index)
         print()
-        print(self.get_metadata())
+        print(self.get_statistics())
         print()
-        print(self.get_status())
-
+        print(self.get_metadata())
