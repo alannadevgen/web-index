@@ -6,9 +6,14 @@ import re
 import requests
 import string
 
+TYPES = {
+    "title": [f'h{i}' for i in range(1, 7)],
+    "paragraph": 'p'
+}
+
 
 class AbstractIndex(ABC):
-    def __init__(self, index={}, urls=None, delete_stopwords=False) -> None:
+    def __init__(self, index={}, urls=None, type:str="title", delete_stopwords=False) -> None:
         self.__index = index
         self.urls = urls
         self.tokens = []
@@ -18,6 +23,7 @@ class AbstractIndex(ABC):
         self.nb_visited_urls = 0
         self.failed_urls = []
         self.nb_failed_urls = 0
+        self.type = type
         if delete_stopwords == True:
             self.stopwords = stopwords.words('french')
         else:
@@ -39,7 +45,7 @@ class AbstractIndex(ABC):
         if html:
             soup = BeautifulSoup(html, 'html.parser')
             raw_text = ''
-            for paragraph in soup.find_all([f'h{i}' for i in range(1, 7)]):
+            for paragraph in soup.find_all(TYPES[self.type]):
                 raw_text += " " + paragraph.text
             return raw_text
 
@@ -56,7 +62,8 @@ class AbstractIndex(ABC):
         text = re.sub(r"(?i)^(?:(?![×Þß÷þø])[-'0-9a-zÀ-ÿ])+$", "", text)
         text = re.sub(r"’|…", " ", text)
         tokens = ''.join(
-            ' ' if char in string.punctuation else char for char in text).lower().strip('').split()
+            ' ' if char in string.punctuation else char for char in text
+        ).lower().strip('').split()
         # compute some statistics
         for token in tokens:
             if token not in self.tokens:
@@ -88,4 +95,16 @@ class AbstractIndex(ABC):
             f"------- Metadata -------\n"
             f"Number of URLs visited: {self.nb_visited_urls}\n"
             f"Number of failed URLs: {self.nb_failed_urls}\n"
+            f"Total number of  URLs: {self.nb_visited_urls + self.nb_failed_urls}"
         )
+
+    def export_metadata(self):
+        metadata = {
+            "nb_documents": self.nb_documents,
+            "nb_tokens": self.nb_tokens,
+            "mean_nb_tokens_per_document": round(self.nb_tokens/self.nb_documents),
+            "nb_visited_urls": self.nb_visited_urls,
+            "nb_failed_urls": self.nb_failed_urls,
+            "nb_total_urls": self.nb_visited_urls + self.nb_failed_urls
+        }
+        return metadata

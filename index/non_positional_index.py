@@ -1,4 +1,5 @@
-from abstract_index import AbstractIndex
+from index.abstract_index import AbstractIndex
+from index.utils import Utils
 from collections import Counter
 import logging
 
@@ -12,11 +13,13 @@ class NonPositionalIndex(AbstractIndex):
             self,
             index={},
             urls=None,
+            type='title',
             delete_stopwords=False
     ) -> None:
         super().__init__(
             index=index,
             urls=urls,
+            type=type,
             delete_stopwords=delete_stopwords
         )
         
@@ -29,28 +32,35 @@ class NonPositionalIndex(AbstractIndex):
                 self.nb_visited_urls += 1
                 tokens = self.tokenize(text=text)
                 tokens_count = Counter(tokens)
+                index = self.get_index()
                 for token in tokens_count:
-                    if token not in self.index.keys():
-                        self.index[token] = [
+                    if token not in index.keys():
+                        index[token] = [
                             {'doc_id': doc_id, 'count': tokens_count[token]}]
                     else:
-                        self.index[token].append(
+                        index[token].append(
                             {'doc_id': doc_id, 'count': tokens_count[token]})
             else:
                 self.failed_urls.append(url)
                 self.nb_failed_urls += 1
-                logging.warning(f'Failed to reach {url}')
 
     def get_metadata(self):
         return super().get_metadata()
 
-    def get_index(self):
-        return self.index
 
-    def run(self):
+    def run(self, sort=True):
         self.create_index()
-        print(self.index)
-        print()
+        index = self.get_index()
+        if sort:
+            index = dict(sorted(index.items()))
+        
+        print("\n------------------------------------------------------------------------------------")
+        print("------------------------------- NON POSITIONAL INDEX -------------------------------")
+        print("------------------------------------------------------------------------------------\n")
         print(self.get_statistics())
         print()
         print(self.get_metadata())
+        metadata = self.export_metadata()
+        utils = Utils()
+        utils.write_index(index=index, is_positional=False, index_type=self.type)
+        utils.write_metadata(metadata=metadata, is_positional=False, index_type=self.type)

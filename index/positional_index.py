@@ -1,4 +1,5 @@
 from index.abstract_index import AbstractIndex
+from index.utils import Utils
 from collections import Counter, OrderedDict
 import logging
 
@@ -12,11 +13,13 @@ class PositionalIndex(AbstractIndex):
             self,
             index={},
             urls=None,
+            type='title',
             delete_stopwords=False
     ) -> None:
         super().__init__(
             index=index,
             urls=urls,
+            type=type,
             delete_stopwords=delete_stopwords
         )
 
@@ -60,13 +63,11 @@ class PositionalIndex(AbstractIndex):
                                 'count': 1
                             }
                         ]
-                    # index[token]['count'] = sum([len(index[token][index_doc]['position']) for index_doc in range(len(index[token]))])
-
+                    # update position in document
                     position += 1
             else:
                 self.failed_urls.append(url)
                 self.nb_failed_urls += 1
-                # logging.warning(f'Failed to reach {url}')
 
     def get_metadata(self):
         return super().get_metadata()
@@ -75,10 +76,15 @@ class PositionalIndex(AbstractIndex):
         self.create_index()
         index = self.get_index()
         if sort:
-            print(dict(sorted(index.items())))
-        else:
-            print(index)
-        print()
+            index = dict(sorted(index.items()))
+        
+        print("\n------------------------------------------------------------------------------------")
+        print("--------------------------------- POSITIONAL INDEX ---------------------------------")
+        print("------------------------------------------------------------------------------------\n")
         print(self.get_statistics())
         print()
         print(self.get_metadata())
+        metadata = self.export_metadata()
+        utils = Utils()
+        utils.write_index(index=index, is_positional=True, index_type=self.type)
+        utils.write_metadata(metadata=metadata, is_positional=True, index_type=self.type)
