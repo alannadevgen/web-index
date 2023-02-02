@@ -29,6 +29,9 @@ class PositionalIndex(AbstractIndex):
         )
 
     def create_index(self):
+        '''
+        Build the positional index for all URLs
+        '''
         for doc_id, url in enumerate(self.urls):
             text = self.get_text_from_url(url=url)
             if text:
@@ -75,6 +78,16 @@ class PositionalIndex(AbstractIndex):
                 self.nb_failed_urls += 1
 
     def run(self, sort=True):
+        '''
+        Process the indexing by building the index.
+        This method prints some information (logs, statistics) if the user requests it.
+        Eventually, the results (index and metadata) are written in two separate documents
+
+        Parameters
+        ----------
+        sort: boolean
+            Should the index be sorted by key?
+        '''
         self.create_index()
         index = self.get_index()
         if sort:
