@@ -9,7 +9,7 @@ import string
 
 class AbstractIndex(ABC):
     def __init__(self, index={}, urls=None, delete_stopwords=False) -> None:
-        self.index = index
+        self.__index = index
         self.urls = urls
         self.tokens = []
         self.nb_tokens = 0
@@ -27,6 +27,7 @@ class AbstractIndex(ABC):
         try:
             req = requests.get(url)
             if req.status_code == 200:
+                logging.info(f'Getting URL {url}')
                 return req.text
             else:
                 return None
@@ -70,6 +71,9 @@ class AbstractIndex(ABC):
     @abstractmethod
     def create_index(self, doc_id, tokens):
         pass
+
+    def get_index(self):
+        return self.__index
 
     def get_statistics(self):
         return (
