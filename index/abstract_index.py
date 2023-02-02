@@ -41,7 +41,7 @@ class AbstractIndex(ABC):
         self.use_stemmer = use_stemmer
         self.stemmer = SnowballStemmer('french') if use_stemmer else None
 
-    def download_url(self, url):
+    def __download_url(self, url):
         try:
             req = requests.get(url)
             if req.status_code == 200:
@@ -55,7 +55,7 @@ class AbstractIndex(ABC):
                 logging.warning(f'Failed to reach {url}')
 
     def get_text_from_url(self, url):
-        html = self.download_url(url=url)
+        html = self.__download_url(url=url)
         if html:
             soup = BeautifulSoup(html, 'html.parser')
             raw_text = ''
@@ -88,12 +88,11 @@ class AbstractIndex(ABC):
                 self.nb_tokens += 1
         # delete stopwords
         if self.stopwords:
-            tokens = [token for token in tokens if not token.lower()
-                      in self.stopwords]
+            tokens = [token for token in tokens if token.lower()
+                      not in self.stopwords]
         # stem tokens
         if self.stemmer is not None:
             tokens = [self.stemmer.stem(token) for token in tokens]
-
         return tokens
 
     @abstractmethod
