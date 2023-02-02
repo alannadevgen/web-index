@@ -130,3 +130,9 @@ dmypy.json
 
 # VSCode settings
 .vscode
+
+# created indexes
+*.non_pos_index.json
+*.non_pos_metadata.json
+*.pos_index.json
+*.pos_metadata.json
