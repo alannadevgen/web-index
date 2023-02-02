@@ -75,9 +75,6 @@ class PositionalIndex(AbstractIndex):
                 self.failed_urls.append(url)
                 self.nb_failed_urls += 1
 
-    def get_metadata(self):
-        return super().get_metadata()
-
     def run(self, sort=True):
         self.create_index()
         index = self.get_index()
