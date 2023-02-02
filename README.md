@@ -1,6 +1,10 @@
-# Web index
+# Web index :round_pushpin:
 
-The aim of this project is to create a web index using a JSON file containing crawled URLs.
+The aim of this project is to create a web index using a file input containing a list of crawled URLs. In order to do this, we used a JSON file `crawled_urls.json` to build our index.
+
+Several options are posible to build the index. It can be based on the title page, the headers or even on the paragraphs, each building a separate index.
+
+Then, the text is split into tokens. Once again, they are multiple options such as deleting stop words (available only for French words) or stem the tokens. Each token is then the starting point for the construction of the index which can be **positional** or **non positional** 
 
 ## Quick start
 
@@ -34,12 +38,31 @@ python3 main.py --help
   ```
 
 By default, the values are:
-* `--index-data="title"` $\rightarrow$ retreive the titles from URLs
-* `--index-type="non-positional"` $\rightarrow$ create a non positional index
-* `--input-file="data/crawled_urls.json"` $\rightarrow$ use predefined URL list in the `data` folder
-* `--print-logs=False` $\rightarrow$ do not print the logs
-* `--print-metadata=False` $\rightarrow$ do not print the metadata
-* `--use-stemmer=False` $\rightarrow$ do not use any stemming process
+* `--index-data "title"` $\rightarrow$ retreive the titles from URLs
+* `--index-type "non-positional"` $\rightarrow$ create a non positional index
+* `--input-file "data/crawled_urls.json"` $\rightarrow$ use predefined URL list in the `data` folder
+* `--print-logs False` $\rightarrow$ do not print the logs
+* `--print-metadata False` $\rightarrow$ do not print the metadata
+* `--use-stemmer False` $\rightarrow$ do not use any stemming process
+
+If you wish you can set differents parameters like:
+
+```bash
+# default values
+python3 main.py
+# index build on the headers
+python3 main.py --index-data "header"
+# index build on the paragraphs
+python3 main.py --index-data "paragraph"
+# positional index with headers
+python3 main.py --index-data "header" --index-type "positional"
+# positional index with headers and output logs
+python3 main.py --index-data "header" --index-type "positional" --print-logs True
+# positional index with headers and output logs and metadata
+python3 main.py --index-data "header" --index-type "positional" --print-logs True --print-metadata True
+# positional index with headers and output logs and metadata and stemmer
+python3 main.py --index-data "header" --index-type "positional" --print-logs True --print-metadata True --use-stemmer True
+```
 
 ## Contributors
 
