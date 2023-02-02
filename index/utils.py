@@ -18,15 +18,24 @@ class Utils:
             path: str = None,
             file_name: str = None,
             index_type: str = 'title',
-            is_positional: bool = True
+            is_positional: bool = True,
+            use_stemmer: bool = False
     ):
-        file_sufix = ".pos_index" if is_positional else ".non_pos_index"
+        sufix = ".pos_index" if is_positional else ".non_pos_index"
         path = '' if path is None else str(path)
         file_name = '' if file_name is None else str(file_name)
+        prefix = 'mon_stemmer.' if use_stemmer else ''
         path_to_file = os.path.join(
-            path, file_name + index_type + file_sufix + '.json')
+            path, prefix + file_name + index_type + sufix + '.json'
+        )
         with open(path_to_file, 'w') as file:
-            file.write(json.dumps(index))
+            file.write(
+                json.dumps(
+                    index,
+                    ensure_ascii=False,
+                    indent=4
+                )
+            )
 
     def write_metadata(
         self,
@@ -34,12 +43,21 @@ class Utils:
             path: str = None,
             file_name: str = None,
             index_type: str = 'title',
-            is_positional: bool = True
+            is_positional: bool = True,
+            use_stemmer: bool = False
     ):
-        file_sufix = ".pos_metadata" if is_positional else ".non_pos_metadata"
+        sufix = ".pos_metadata" if is_positional else ".non_pos_metadata"
         path = '' if path is None else str(path)
         file_name = '' if file_name is None else str(file_name)
+        prefix = 'mon_stemmer.' if use_stemmer else ''
         path_to_file = os.path.join(
-            path, file_name + index_type + file_sufix + '.json')
+            path, prefix + file_name + index_type + sufix + '.json'
+        )
         with open(path_to_file, 'w') as file:
-            file.write(json.dumps(metadata))
+            file.write(
+                json.dumps(
+                    metadata,
+                    ensure_ascii=False,
+                    indent=4
+                )
+            )
