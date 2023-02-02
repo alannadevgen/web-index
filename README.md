@@ -66,4 +66,4 @@ python3 main.py --index-data "header" --index-type "positional" --print-logs Tru
 
 ## Contributors
 
-Alanna DEVLIN-GENIN
+[Alanna DEVLIN-GENIN](https://github.com/alannagenin/)
