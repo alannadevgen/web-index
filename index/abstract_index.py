@@ -1,19 +1,30 @@
 from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
+from nltk.stem import SnowballStemmer
 import logging
 import re
 import requests
 import string
 
 TYPES = {
-    "title": [f'h{i}' for i in range(1, 7)],
+    "title": 'title',
+    "header": [f'h{i}' for i in range(1, 7)],
     "paragraph": 'p'
 }
 
 
 class AbstractIndex(ABC):
-    def __init__(self, index={}, urls=None, type:str="title", delete_stopwords=False) -> None:
+    def __init__(
+            self,
+            index={},
+            urls=None,
+            type: str = "title",
+            print_logs=False,
+            print_metadata=False,
+            delete_stopwords=False,
+            use_stemmer=False
+    ) -> None:
         self.__index = index
         self.urls = urls
         self.tokens = []
@@ -24,21 +35,24 @@ class AbstractIndex(ABC):
         self.failed_urls = []
         self.nb_failed_urls = 0
         self.type = type
-        if delete_stopwords == True:
-            self.stopwords = stopwords.words('french')
-        else:
-            self.stopwords = None
+        self.print_logs = print_logs
+        self.print_metadata = print_metadata
+        self.stopwords = stopwords.words('french') if delete_stopwords else None
+        self.use_stemmer = use_stemmer
+        self.stemmer = SnowballStemmer('french') if use_stemmer else None
 
     def download_url(self, url):
         try:
             req = requests.get(url)
             if req.status_code == 200:
-                logging.info(f'Getting URL {url}')
+                if self.print_logs:
+                    logging.info(f'Getting URL {url}')
                 return req.text
             else:
                 return None
         except Exception:
-            logging.warning(f'Failed to reach {url}')
+            if self.print_logs:
+                logging.warning(f'Failed to reach {url}')
 
     def get_text_from_url(self, url):
         html = self.download_url(url=url)
@@ -59,10 +73,13 @@ class AbstractIndex(ABC):
         -------
             list: list of tokens
         """
+        # keep all letters (accents included)
         text = re.sub(r"(?i)^(?:(?![×Þß÷þø])[-'0-9a-zÀ-ÿ])+$", "", text)
+        # replace anormal punctuation by a whitespace
         text = re.sub(r"’|…", " ", text)
+        # delete punctuation and numbers then lowercase and delete trailing whitespaces then split string
         tokens = ''.join(
-            ' ' if char in string.punctuation else char for char in text
+            ' ' if char in string.punctuation or char.isdigit() else char for char in text
         ).lower().strip('').split()
         # compute some statistics
         for token in tokens:
@@ -73,6 +90,10 @@ class AbstractIndex(ABC):
         if self.stopwords:
             tokens = [token for token in tokens if not token.lower()
                       in self.stopwords]
+        # stem tokens
+        if self.stemmer is not None:
+            tokens = [self.stemmer.stem(token) for token in tokens]
+
         return tokens
 
     @abstractmethod
@@ -108,3 +129,7 @@ class AbstractIndex(ABC):
             "nb_total_urls": self.nb_visited_urls + self.nb_failed_urls
         }
         return metadata
+    
+    @abstractmethod
+    def run(self):
+        pass

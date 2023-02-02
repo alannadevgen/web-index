@@ -14,15 +14,20 @@ class NonPositionalIndex(AbstractIndex):
             index={},
             urls=None,
             type='title',
-            delete_stopwords=False
+            print_logs=False,
+            print_metadata=False,
+            delete_stopwords=False,
+            use_stemmer=False
     ) -> None:
         super().__init__(
             index=index,
             urls=urls,
             type=type,
-            delete_stopwords=delete_stopwords
+            print_logs=print_logs,
+            print_metadata=print_metadata,
+            delete_stopwords=delete_stopwords,
+            use_stemmer=use_stemmer
         )
-        
 
     def create_index(self):
         for doc_id, url in enumerate(self.urls):
@@ -47,20 +52,33 @@ class NonPositionalIndex(AbstractIndex):
     def get_metadata(self):
         return super().get_metadata()
 
-
     def run(self, sort=True):
         self.create_index()
         index = self.get_index()
         if sort:
             index = dict(sorted(index.items()))
-        
-        print("\n------------------------------------------------------------------------------------")
-        print("------------------------------- NON POSITIONAL INDEX -------------------------------")
-        print("------------------------------------------------------------------------------------\n")
-        print(self.get_statistics())
-        print()
-        print(self.get_metadata())
+
+        if self.print_metadata:
+            print(
+                "\n------------------------------------------------------------------------------------")
+            print(
+                "------------------------------- NON POSITIONAL INDEX -------------------------------")
+            print(
+                "------------------------------------------------------------------------------------\n")
+            print(self.get_statistics())
+            print()
+            print(self.get_metadata())
         metadata = self.export_metadata()
         utils = Utils()
-        utils.write_index(index=index, is_positional=False, index_type=self.type)
-        utils.write_metadata(metadata=metadata, is_positional=False, index_type=self.type)
+        utils.write_index(
+            index=index,
+            is_positional=False,
+            index_type=self.type,
+            use_stemmer=self.use_stemmer
+        )
+        utils.write_metadata(
+            metadata=metadata,
+            is_positional=False,
+            index_type=self.type,
+            use_stemmer=self.use_stemmer
+        )
