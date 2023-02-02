@@ -1,6 +1,5 @@
 from index.abstract_index import AbstractIndex
 from index.utils import Utils
-from collections import Counter, OrderedDict
 import logging
 
 logging.basicConfig(
