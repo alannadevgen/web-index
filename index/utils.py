@@ -39,12 +39,12 @@ class Utils:
 
     def write_metadata(
         self,
-            metadata: Dict,
-            path: str = None,
-            file_name: str = None,
-            index_type: str = 'title',
-            is_positional: bool = True,
-            use_stemmer: bool = False
+        metadata: Dict,
+        path: str = None,
+        file_name: str = None,
+        index_type: str = 'title',
+        is_positional: bool = True,
+        use_stemmer: bool = False
     ):
         sufix = ".pos_metadata" if is_positional else ".non_pos_metadata"
         path = '' if path is None else str(path)
